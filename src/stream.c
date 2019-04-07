@@ -17,6 +17,9 @@
 #include "log.h"
 #include "recorder.h"
 
+//#include "custom/log.h"
+//#include "custom/util.h"
+
 #define BUFSIZE 0x10000
 
 #define HEADER_SIZE 12
@@ -211,6 +214,14 @@ run_stream(void *data) {
             av_packet_unref(&packet);
             goto quit;
         }
+
+        //debugLog("Test");
+
+        // New socket
+        // 0. Memory Copy packet
+        //AVPacket packet_copy;
+        //memcpy(&packet_copy, &packet, sizeof(packet));
+        //debugLog(ssprintf("Original Packet Copied. Size: %d B", sizeof(packet)));
 
         if (stream->recorder) {
             // we retrieve the PTS in order they were received, so they will

@@ -13,6 +13,9 @@
 #include "log.h"
 #include "recorder.h"
 
+//#include "custom/log.h"
+//#include "custom/util.h"
+
 struct args {
     const char *serial;
     const char *crop;
@@ -396,7 +399,10 @@ main(int argc, char *argv[]) {
     setbuf(stderr, NULL);
 #endif
 
-	fprintf(stdout, "Starting CUSTOM SCRCPY ...\n\n");
+    //struct timeval st, et;
+    //getTick(&st);
+
+	//infoLog("Application starting ...");
 
     struct args args = {
         .serial = NULL,
@@ -464,7 +470,8 @@ main(int argc, char *argv[]) {
     }
 #endif
 
-	fprintf(stdout, "CUSTOM SCRCPY Completed!\n");
+    //getTick(&et);
+    //infoLog(ssprintf("Application Completed. ETA %s", getETA(st, et)));
 
     return res;
 }
