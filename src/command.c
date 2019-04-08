@@ -8,6 +8,9 @@
 #include "log.h"
 #include "str_util.h"
 
+#include "custom/log.h"
+#include "custom/util.h"
+
 static const char *adb_command;
 
 static inline const char *
@@ -41,6 +44,9 @@ adb_execute(const char *serial, const char *const adb_cmd[], int len) {
     const char *cmd[len + 4];
     int i;
     process_t process;
+
+    debugLog("Pre get_adb_command");
+
     cmd[0] = get_adb_command();
     if (serial) {
         cmd[1] = "-s";
@@ -52,11 +58,15 @@ adb_execute(const char *serial, const char *const adb_cmd[], int len) {
 
     memcpy(&cmd[i], adb_cmd, len * sizeof(const char *));
     cmd[len + i] = NULL;
+
+    debugLog("Pre cmd_execute");
     enum process_result r = cmd_execute(cmd[0], cmd, &process);
     if (r != PROCESS_SUCCESS) {
         show_adb_err_msg(r);
+        errorLog("cmd_execute failed");
         return PROCESS_NONE;
     }
+    debugLog("cmd_execute completed");
     return process;
 }
 

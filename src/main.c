@@ -13,8 +13,8 @@
 #include "log.h"
 #include "recorder.h"
 
-//#include "custom/log.h"
-//#include "custom/util.h"
+#include "custom/log.h"
+#include "custom/util.h"
 
 struct args {
     const char *serial;
@@ -399,10 +399,10 @@ main(int argc, char *argv[]) {
     setbuf(stderr, NULL);
 #endif
 
-    //struct timeval st, et;
-    //getTick(&st);
+    struct timeval st, et;
+    getTick(&st);
 
-	//infoLog("Application starting ...");
+	infoLog("Application starting ...");
 
     struct args args = {
         .serial = NULL,
@@ -470,8 +470,8 @@ main(int argc, char *argv[]) {
     }
 #endif
 
-    //getTick(&et);
-    //infoLog(ssprintf("Application Completed. ETA %s", getETA(st, et)));
+    getTick(&et);
+    infoLog(ssprintf("Application Completed. ETA %s", getETA(st, et)));
 
     return res;
 }

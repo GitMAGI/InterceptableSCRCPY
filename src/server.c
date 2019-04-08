@@ -10,6 +10,9 @@
 #include "log.h"
 #include "net.h"
 
+#include "custom\util.h"
+#include "custom\log.h"
+
 #define SOCKET_NAME "scrcpy"
 
 #ifdef OVERRIDE_SERVER_PATH
@@ -99,6 +102,7 @@ execute_server(const char *serial,
         crop ? crop : "-",
         send_frame_meta ? "true" : "false",
     };
+    
     return adb_execute(serial, cmd, sizeof(cmd) / sizeof(cmd[0]));
 }
 
@@ -171,19 +175,27 @@ server_start(struct server *server, const char *serial,
         }
     }
 
+    debugLog("Pre JAR Pushing");
     if (!push_server(serial)) {
         SDL_free(server->serial);
+        errorLog("JAR Pushing failed");
         return false;
     }
+    debugLog("JAR Pushed");
 
+    debugLog("Pre Server Tunnel Enablig");
     if (!enable_tunnel(server)) {
         SDL_free(server->serial);
+        errorLog("Tunnel Enablig Failed");
         return false;
     }
+    debugLog("Server Tunnel Enabled");
 
+    debugLog("Pre Server Tunnel Forwarding (adb forward)");
     // if "adb reverse" does not work (e.g. over "adb connect"), it fallbacks to
     // "adb forward", so the app socket is the client
     if (!server->tunnel_forward) {
+        debugLog("Server Tunnel Forwarded");
         // At the application level, the device part is "the server" because it
         // serves video stream and control. However, at the network level, the
         // client listens and the server connects to the client. That way, the
@@ -191,19 +203,24 @@ server_start(struct server *server, const char *serial,
         // need to try to connect until the server socket is listening on the
         // device.
 
+        debugLog(ssprintf("Pre Server Listening on port %d", local_port));
         server->server_socket = listen_on_port(local_port);
         if (server->server_socket == INVALID_SOCKET) {
+            errorLog(ssprintf("Server Listening on port %d Failed", local_port));
             LOGE("Could not listen on port %" PRIu16, local_port);
             disable_tunnel(server);
             SDL_free(server->serial);
             return false;
         }
+        debugLog(ssprintf("Server Listening on port %d", local_port));
     }
 
+    debugLog(ssprintf("Pre Server Executing. Serial: %s, MaxSize: %d, BitRate: %d, Forwarded: %d, Crop: %s, SendFrameMeta: %d", serial, max_size, bit_rate, server->tunnel_forward, crop, send_frame_meta));
     // server will connect to our server socket
     server->process = execute_server(serial, max_size, bit_rate,
                                      server->tunnel_forward, crop,
                                      send_frame_meta);
+    debugLog("Server Executed");
 
     if (server->process == PROCESS_NONE) {
         if (!server->tunnel_forward) {

@@ -17,8 +17,8 @@
 #include "log.h"
 #include "recorder.h"
 
-//#include "custom/log.h"
-//#include "custom/util.h"
+#include "custom/log.h"
+#include "custom/util.h"
 
 #define BUFSIZE 0x10000
 
@@ -150,19 +150,27 @@ notify_stopped(void) {
 
 static int
 run_stream(void *data) {
+    debugLog("Starting run_stream");
+
     struct stream *stream = data;
 
+    debugLog("Starting avformat_alloc_context");
     AVFormatContext *format_ctx = avformat_alloc_context();
     if (!format_ctx) {
+        errorLog("Could not allocate format context");
         LOGC("Could not allocate format context");
         goto end;
     }
+    debugLog("avformat_alloc_context Completed");
 
+    debugLog(ssprintf("Starting av_malloc with Buffer Size of %d", BUFSIZE));
     unsigned char *buffer = av_malloc(BUFSIZE);
     if (!buffer) {
-        LOGC("Could not allocate buffer");
+        errorLog("Could not allocate buffer");
+        LOGC("Could not allocate buffer");        
         goto finally_free_format_ctx;
     }
+    debugLog("av_malloc Completed");
 
     // initialize the receiver state
     stream->receiver_state.frame_meta_queue = NULL;
@@ -173,7 +181,9 @@ run_stream(void *data) {
             stream->recorder ? read_packet_with_meta : read_raw_packet;
     AVIOContext *avio_ctx = avio_alloc_context(buffer, BUFSIZE, 0, stream,
                                                read_packet, NULL, NULL);
+      
     if (!avio_ctx) {
+        errorLog("Could not allocate avio context");
         LOGC("Could not allocate avio context");
         // avformat_open_input takes ownership of 'buffer'
         // so only free the buffer before avformat_open_input()
@@ -183,26 +193,38 @@ run_stream(void *data) {
 
     format_ctx->pb = avio_ctx;
 
+    debugLog("Starting avformat_open_input");  
     if (avformat_open_input(&format_ctx, NULL, NULL, NULL) < 0) {
+        errorLog("Could not open video stream");
         LOGE("Could not open video stream");
         goto finally_free_avio_ctx;
     }
+    debugLog("avformat_open_input Completed");
 
+    debugLog("Starting avcodec_find_decoder");  
     AVCodec *codec = avcodec_find_decoder(AV_CODEC_ID_H264);
     if (!codec) {
+        errorLog("H.264 decoder not found");
         LOGE("H.264 decoder not found");
         goto end;
     }
+    debugLog("avcodec_find_decoder Completed");
 
+    debugLog("Starting decoder_open");  
     if (stream->decoder && !decoder_open(stream->decoder, codec)) {
+        errorLog("Could not open decoder");
         LOGE("Could not open decoder");
         goto finally_close_input;
     }
+    debugLog("decoder_open Completed");
 
+    debugLog("Starting recorder_open");  
     if (stream->recorder && !recorder_open(stream->recorder, codec)) {
+        errorLog("Could not open recorder");
         LOGE("Could not open recorder");
         goto finally_close_input;
     }
+    debugLog("recorder_open Completed");
 
     AVPacket packet;
     av_init_packet(&packet);
@@ -219,9 +241,9 @@ run_stream(void *data) {
 
         // New socket
         // 0. Memory Copy packet
-        //AVPacket packet_copy;
-        //memcpy(&packet_copy, &packet, sizeof(packet));
-        //debugLog(ssprintf("Original Packet Copied. Size: %d B", sizeof(packet)));
+        AVPacket packet_copy;
+        memcpy(&packet_copy, &packet, sizeof(packet));
+        debugLog(ssprintf("Original Packet Copied. Size: %d B", sizeof(packet)));
 
         if (stream->recorder) {
             // we retrieve the PTS in order they were received, so they will
@@ -245,6 +267,8 @@ run_stream(void *data) {
             break;
         }
     }
+
+    debugLog("Execution of run_stream completed");
 
     LOGD("End of frames");
 
@@ -276,11 +300,16 @@ bool
 stream_start(struct stream *stream) {
     LOGD("Starting stream thread");
 
+    // Check SDL Thread! The key is there
+
+    debugLog(ssprintf("Pre SDL_CreateThread. Stream size: %d", sizeof(stream)));
     stream->thread = SDL_CreateThread(run_stream, "stream", stream);
     if (!stream->thread) {
+        errorLog("Could not start stream thread");
         LOGC("Could not start stream thread");
         return false;
     }
+    debugLog("SDL_CreateThread successful executed");
     return true;
 }
 
