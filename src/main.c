@@ -471,7 +471,7 @@ main(int argc, char *argv[]) {
 #endif
 
     getTick(&et);
-    infoLog(ssprintf("Application Completed. ETA %s", getETA(st, et)));
+    infoLog("Application Completed. ETA %s", getETA(st, et));
 
     return res;
 }

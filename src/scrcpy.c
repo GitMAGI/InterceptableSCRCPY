@@ -280,15 +280,10 @@ scrcpy(const struct scrcpy_options *options) {
     bool display = !options->no_display;
     bool control = !options->no_control;
 
-    debugLog("Pre SDL Init And Configure");
     if (!sdl_init_and_configure(display)) {
         ret = false;
-        errorLog("SDL Initiated and Configured Failed");
         goto finally_destroy_server;
     }
-    debugLog("SDL Initiated and Configured");
-
-    debugLog("Pre Server Connection");
     socket_t device_socket = server_connect_to(&server);
     if (device_socket == INVALID_SOCKET) {
         errorLog("Server Connection Error");
@@ -296,7 +291,6 @@ scrcpy(const struct scrcpy_options *options) {
         ret = false;
         goto finally_destroy_server;
     }
-    debugLog("Server Connected");
 
     char device_name[DEVICE_NAME_FIELD_LENGTH];
     struct size frame_size;
@@ -304,15 +298,12 @@ scrcpy(const struct scrcpy_options *options) {
     // screenrecord does not send frames when the screen content does not
     // change therefore, we transmit the screen size before the video stream,
     // to be able to init the window immediately
-    debugLog("Pre Device Info-Reading");
     if (!device_read_info(device_socket, device_name, &frame_size)) {
         server_stop(&server);
         ret = false;
         goto finally_destroy_server;
     }
-    debugLog("Device Info read successfully");
-
-    debugLog("Pre Device Video Buffer Initiating");
+    
     struct decoder *dec = NULL;
     if (display) {
         if (!video_buffer_init(&video_buffer)) {
@@ -330,9 +321,7 @@ scrcpy(const struct scrcpy_options *options) {
         decoder_init(&decoder, &video_buffer);
         dec = &decoder;
     }
-    debugLog("Device Video Bffer Initiated");
-
-    debugLog("Pre Device Video Recording Initiating");
+    
     struct recorder *rec = NULL;
     if (record) {
         if (!recorder_init(&recorder,
@@ -345,17 +334,11 @@ scrcpy(const struct scrcpy_options *options) {
         }
         rec = &recorder;
     }
-    debugLog("Device Video Recording Initiated");
-
-    debugLog("Pre av_log_set_callback");
+    
     av_log_set_callback(av_log_callback);
-    debugLog("av_log_set_callback Executed");
-
-    debugLog("Pre Stream Init");
+    
     stream_init(&stream, device_socket, dec, rec);
-    debugLog("Stream Initiated");
-
-    debugLog("Pre Stream Start");
+    
     // now we consumed the header values, the socket receives the video stream
     // start the stream
     if (!stream_start(&stream)) {
@@ -363,7 +346,6 @@ scrcpy(const struct scrcpy_options *options) {
         server_stop(&server);
         goto finally_destroy_recorder;
     }
-    debugLog("Stream Started");
 
     if (display) {
         if (control) {

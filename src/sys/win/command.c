@@ -28,15 +28,11 @@ cmd_execute(const char *path, const char *const argv[], HANDLE *handle) {
     memset(&si, 0, sizeof(si));
     si.cb = sizeof(si);
 
-    debugLog("Pre Command building");
-
     char cmd[256];
     if (build_cmd(cmd, sizeof(cmd), argv)) {
         *handle = NULL;
         return PROCESS_ERROR_GENERIC;
     }
-
-    debugLog(ssprintf("Command built: %s", cmd));
 
     wchar_t *wide = utf8_to_wide_char(cmd);
     if (!wide) {

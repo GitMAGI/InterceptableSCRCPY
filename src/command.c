@@ -45,8 +45,6 @@ adb_execute(const char *serial, const char *const adb_cmd[], int len) {
     int i;
     process_t process;
 
-    debugLog("Pre get_adb_command");
-
     cmd[0] = get_adb_command();
     if (serial) {
         cmd[1] = "-s";
@@ -58,15 +56,11 @@ adb_execute(const char *serial, const char *const adb_cmd[], int len) {
 
     memcpy(&cmd[i], adb_cmd, len * sizeof(const char *));
     cmd[len + i] = NULL;
-
-    debugLog("Pre cmd_execute");
     enum process_result r = cmd_execute(cmd[0], cmd, &process);
     if (r != PROCESS_SUCCESS) {
         show_adb_err_msg(r);
-        errorLog("cmd_execute failed");
         return PROCESS_NONE;
     }
-    debugLog("cmd_execute completed");
     return process;
 }
 

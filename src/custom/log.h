@@ -1,5 +1,5 @@
-#ifndef LOG_CUSTOM_H
-#define LOG_CUSTOM_H
+#ifndef CUSTOM_LOG_H
+#define CUSTOM_LOG_H
 
 #include <stdbool.h>
 #include <stdarg.h>
@@ -14,26 +14,18 @@ typedef enum
 	LCRITICAL = 4
 } LogType;
 
-/*
-void debugLog(char *msg);
-void infoLog(char *msg);
-void warningLog(char *msg);
-void errorLog(char *msg);
-void criticalLog(char *msg);
-*/
-
-void debugLog_(char *msg, char const * caller_name);
-void infoLog_(char *msg, char const * caller_name);
-void warningLog_(char *msg, char const * caller_name);
-void errorLog_(char *msg, char const * caller_name);
-void criticalLog_(char *msg, char const * caller_name);
+void debugLog_(char const * caller_name, char *format, ...);
+void infoLog_(char const * caller_name, char *format, ...);
+void warningLog_(char const * caller_name, char *format, ...);
+void errorLog_(char const * caller_name, char *format, ...);
+void criticalLog_(char const * caller_name, char *format, ...);
 
 void writeLog(char* msg, const char* scope, LogType type);
 
-#define debugLog(msg) debugLog_(msg, __FUNCTION__)
-#define infoLog(msg) infoLog_(msg, __FUNCTION__)
-#define warningLog(msg) warningLog_(msg, __FUNCTION__)
-#define errorLog(msg) errorLog_(msg, __FUNCTION__)
-#define criticalLog(msg) criticalLog_(msg, __FUNCTION__)
+#define debugLog(format, ...) debugLog_(__FUNCTION__, format, ##__VA_ARGS__)
+#define infoLog(format, ...) infoLog_(__FUNCTION__, format, ##__VA_ARGS__)
+#define warningLog(format, ...) warningLog_(__FUNCTION__, format, ##__VA_ARGS__)
+#define errorLog(format, ...) errorLog_(__FUNCTION__, format, ##__VA_ARGS__)
+#define criticalLog(format, ...) criticalLog_(__FUNCTION__, format, ##__VA_ARGS__)
 
 #endif

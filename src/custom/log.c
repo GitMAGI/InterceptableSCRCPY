@@ -19,23 +19,73 @@
 #include "util.h"
 #include "config.h"
 
-void debugLog_(char *msg, const char* caller){
+void debugLog_(const char* caller, char* format, ...){
+	char *msg;
+	va_list argptr;
+    if(argptr == NULL)
+        msg = format;
+    va_start(argptr, format);
+    ssize_t bufsz = vsnprintf(NULL, 0, format, argptr);
+	msg = malloc(bufsz + 1);
+    vsnprintf(msg, bufsz + 1, format, argptr);
+    va_end(argptr);
+
 	writeLog(msg, caller, LDEBUG);
 }
 
-void infoLog_(char *msg, const char* caller){
+void infoLog_(const char* caller, char* format, ...){
+	char *msg;
+	va_list argptr;
+    if(argptr == NULL)
+        msg = format;
+    va_start(argptr, format);
+    ssize_t bufsz = vsnprintf(NULL, 0, format, argptr);
+	msg = malloc(bufsz + 1);
+    vsnprintf(msg, bufsz + 1, format, argptr);
+    va_end(argptr);
+	
 	writeLog(msg, caller, LINFO);
 }
 
-void warningLog_(char *msg, const char* caller){
+void warningLog_(const char* caller, char* format, ...){
+	char *msg;
+	va_list argptr;
+    if(argptr == NULL)
+        msg = format;
+    va_start(argptr, format);
+    ssize_t bufsz = vsnprintf(NULL, 0, format, argptr);
+	msg = malloc(bufsz + 1);
+    vsnprintf(msg, bufsz + 1, format, argptr);
+    va_end(argptr);
+	
 	writeLog(msg, caller, LWARNING);
 }
 
-void errorLog_(char *msg, const char* caller){
+void errorLog_(const char* caller, char* format, ...){
+	char *msg;
+	va_list argptr;
+    if(argptr == NULL)
+        msg = format;
+    va_start(argptr, format);
+    ssize_t bufsz = vsnprintf(NULL, 0, format, argptr);
+	msg = malloc(bufsz + 1);
+    vsnprintf(msg, bufsz + 1, format, argptr);
+    va_end(argptr);
+
 	writeLog(ssprintf("%s. Error Code: %d. Error Description: %s", msg, errno, strerror(errno)), caller, LERROR);
 }
 
-void criticalLog_(char *msg, const char* caller){
+void criticalLog_(const char* caller, char* format, ...){
+	char *msg;
+	va_list argptr;
+    if(argptr == NULL)
+        msg = format;
+    va_start(argptr, format);
+    ssize_t bufsz = vsnprintf(NULL, 0, format, argptr);
+	msg = malloc(bufsz + 1);
+    vsnprintf(msg, bufsz + 1, format, argptr);
+    va_end(argptr);
+
 	writeLog(ssprintf("%s. Error Code: %d. Error Description: %s", msg, errno, strerror(errno)), caller, LCRITICAL);
 }
 
