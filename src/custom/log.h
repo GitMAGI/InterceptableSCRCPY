@@ -1,5 +1,5 @@
-#ifndef LOG_H
-#define LOG_H
+#ifndef CUSTOM_LOG_H
+#define CUSTOM_LOG_H
 
 #include <stdbool.h>
 #include <stdarg.h>

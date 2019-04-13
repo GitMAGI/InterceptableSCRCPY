@@ -17,6 +17,9 @@
 #include "recorder.h"
 #include "video_buffer.h"
 
+#include "custom/log.h"
+#include "custom/util.h"
+
 // set the decoded frame as ready for rendering, and notify
 static void
 push_frame(struct decoder *decoder) {
@@ -66,6 +69,7 @@ decoder_push(struct decoder *decoder, const AVPacket *packet) {
 // the new decoding/encoding API has been introduced by:
 // <http://git.videolan.org/?p=ffmpeg.git;a=commitdiff;h=7fc329e2dd6226dfecaa4a1d7adf353bf2773726>
 #ifdef SCRCPY_LAVF_HAS_NEW_ENCODING_DECODING_API
+    // Siamo in questo contesto
     int ret;
     if ((ret = avcodec_send_packet(decoder->codec_ctx, packet)) < 0) {
         LOGE("Could not send video packet: %d", ret);
@@ -81,6 +85,7 @@ decoder_push(struct decoder *decoder, const AVPacket *packet) {
         return false;
     }
 #else
+    // Non entriamo qui!!!!
     int got_picture;
     int len = avcodec_decode_video2(decoder->codec_ctx,
                                     decoder->video_buffer->decoding_frame,

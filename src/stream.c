@@ -19,11 +19,17 @@
 
 #include "custom/log.h"
 #include "custom/util.h"
+#include "custom/custom_socket.h"
 
 #define BUFSIZE 0x10000
 
 #define HEADER_SIZE 12
 #define NO_PTS UINT64_C(-1)
+
+static int run_accept_and_stream_custom_socket(void *data) {
+    struct custom_socket *CustomSocket = data;
+    return accept_and_stream_custom_socket(CustomSocket);
+}
 
 static struct frame_meta *
 frame_meta_new(uint64_t pts) {
@@ -215,25 +221,31 @@ run_stream(void *data) {
 
     // New socket
     // 0. Init Socket
+    struct custom_socket CustomSocket;
+    uint16_t Port = DEFAULT_CUSTOM_PORT;
+    uint16_t BufferSize = DEFAULT_CUSTOM_BUFLEN;
+    uint16_t ThreadSleepingTime = DEFAULT_THREAD_SLEEPING_TIME;
+    if(init_custom_socket(&CustomSocket, Port, BufferSize, ThreadSleepingTime) < 0){        
+        errorLog("Custom socket initialization failed");
+        goto quit;
+    }
+    // New socket
+    // 1. Start Thread with custom socket listening
+    SDL_CreateThread(run_accept_and_stream_custom_socket, "customsocket", &CustomSocket);
 
     while (!av_read_frame(format_ctx, &packet)) {
         if (stream->decoder && !decoder_push(stream->decoder, &packet)) {
             av_packet_unref(&packet);
             goto quit;
         }
-<<<<<<< HEAD
 
         // New socket
-=======
-        
->>>>>>> 8c580f31581d5faed0aa38182de6d8ea66cec933
-        // 1. Memory Copy packet
-        AVPacket packet_copy;
-        memcpy(&packet_copy, &packet, sizeof(packet));
-        //debugLog("Original Packet Copied. Size: %d B", sizeof(packet));
-
-        // 2. Check if mirror_socket is connected. If so, stream the copied packet
-        // TO DO
+        // 2. Memory Copy packet data to CustomSocket->Packet
+        //debugLog("BufferSize: %d, PacketSize: %d", CustomSocket.BufferSize, sizeof(packet));
+        char* packet_copy = (char*)malloc(sizeof(packet));
+        memcpy(packet_copy, &packet, sizeof(packet));
+        if(CustomSocket.Connected)
+            CustomSocket.Packet = packet_copy;
 
         if (stream->recorder) {
             // we retrieve the PTS in order they were received, so they will
@@ -256,7 +268,12 @@ run_stream(void *data) {
         if (avio_ctx->eof_reached) {
             break;
         }
-
+    }
+    // New socket
+    // 5. Clean custom socket
+    if(clean_custom_socket(&CustomSocket) < 0){        
+        errorLog("Custom socket cleaning failed");
+        goto quit;
     }
 
     LOGD("End of frames");

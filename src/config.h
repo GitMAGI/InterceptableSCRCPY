@@ -9,8 +9,9 @@
 #define PREFIXED_SERVER_PATH "bin/scrcpy-server.jar"
 
 #define APPNAME "InterceptableSCRCPY"
-#define LOGFILEPATH "\\Temp\\InterceptableSCRCPY\\Log\\"
+//#define LOGFILEPATH "\\Temp\\InterceptableSCRCPY\\Log\\"
 #define DEFAULT_CUSTOM_BUFLEN 512
 #define DEFAULT_CUSTOM_PORT 27015
+#define DEFAULT_THREAD_SLEEPING_TIME 5
 
 #endif
