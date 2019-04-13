@@ -209,6 +209,9 @@ run_stream(void *data) {
     packet.data = NULL;
     packet.size = 0;
 
+    // New socket
+    // 0. Init Socket
+
     while (!av_read_frame(format_ctx, &packet)) {
         if (stream->decoder && !decoder_push(stream->decoder, &packet)) {
             av_packet_unref(&packet);
@@ -216,7 +219,7 @@ run_stream(void *data) {
         }
 
         // New socket
-        // 0. Memory Copy packet
+        // 1. Memory Copy packet
         AVPacket packet_copy;
         memcpy(&packet_copy, &packet, sizeof(packet));
         //debugLog("Original Packet Copied. Size: %d B", sizeof(packet));

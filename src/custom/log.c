@@ -133,7 +133,7 @@ void writeLog(char* msg, const char* scope, LogType type){
             fprintf(fp, toLog);
         }
         else{
-			fprintf(stderr, "Logging Error on file %s", filename);
+			fprintf(stderr, "Logging Error on file %s\n", filename);
         }
         
     }
