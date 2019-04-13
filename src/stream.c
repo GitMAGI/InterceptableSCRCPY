@@ -203,6 +203,10 @@ run_stream(void *data) {
         LOGE("Could not open recorder");
         goto finally_close_input;
     }
+
+    // New socket
+    // 0. Open Socket in another thread wating for connection
+    // TO DO
     
     AVPacket packet;
     av_init_packet(&packet);
@@ -217,12 +221,19 @@ run_stream(void *data) {
             av_packet_unref(&packet);
             goto quit;
         }
+<<<<<<< HEAD
 
         // New socket
+=======
+        
+>>>>>>> 8c580f31581d5faed0aa38182de6d8ea66cec933
         // 1. Memory Copy packet
         AVPacket packet_copy;
         memcpy(&packet_copy, &packet, sizeof(packet));
         //debugLog("Original Packet Copied. Size: %d B", sizeof(packet));
+
+        // 2. Check if mirror_socket is connected. If so, stream the copied packet
+        // TO DO
 
         if (stream->recorder) {
             // we retrieve the PTS in order they were received, so they will
