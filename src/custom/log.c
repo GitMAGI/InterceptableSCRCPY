@@ -71,8 +71,11 @@ void errorLog_(const char* caller, char* format, ...){
 	msg = malloc(bufsz + 1);
     vsnprintf(msg, bufsz + 1, format, argptr);
     va_end(argptr);
-
-	writeLog(ssprintf("%s. Error Code: %d. Error Description: %s", msg, errno, strerror(errno)), caller, LERROR);
+    
+    if(errno != 0)
+        writeLog(ssprintf("%s. Error Code: %d. Error Description: %s", msg, errno, strerror(errno)), caller, LERROR);
+    else
+        writeLog(msg, caller, LERROR);
 }
 
 void criticalLog_(const char* caller, char* format, ...){
@@ -86,14 +89,13 @@ void criticalLog_(const char* caller, char* format, ...){
     vsnprintf(msg, bufsz + 1, format, argptr);
     va_end(argptr);
 
-	writeLog(ssprintf("%s. Error Code: %d. Error Description: %s", msg, errno, strerror(errno)), caller, LCRITICAL);
+    if(errno != 0)
+        writeLog(ssprintf("%s. Error Code: %d. Error Description: %s", msg, errno, strerror(errno)), caller, LCRITICAL);
+    else
+        writeLog(msg, caller, LCRITICAL);
 }
 
 void writeLog(char* msg, const char* scope, LogType type){
-	bool file = false;
-	if(strlen(LOGFILEPATH) > 0)
-		file = true;
-
 	char* str = "DEBUG";
 	switch(type)
     {
@@ -119,7 +121,7 @@ void writeLog(char* msg, const char* scope, LogType type){
     char* toLog = toLog = ssprintf("%s | %s | %s | %s() >>> %s\n", getCurrentTimeStamp(), str, APPNAME, scope, msg);
     fprintf(stdout, toLog);
 
-    if(file == true){
+    #if defined LOGFILEPATH
         char* fileextension = "log";
         char* filepath = LOGFILEPATH;
         char* filejustname = getCurrentTimeStampForFileName();
@@ -135,6 +137,5 @@ void writeLog(char* msg, const char* scope, LogType type){
         else{
 			fprintf(stderr, "Logging Error on file %s\n", filename);
         }
-        
-    }
+    #endif
 }
