@@ -116,7 +116,8 @@ int accept_and_stream_custom_socket(struct custom_socket *CustomSocket){
         if (CustomSocket->ClientSocket == INVALID_SOCKET) {
             criticalLog("Accepting Socket Accept failed");
             CustomSocket->Connected = false;
-            closesocket(CustomSocket->ClientSocket);            
+            closesocket(CustomSocket->ClientSocket);   
+            CustomSocket->Stopped = true;                   
             break;
         }
         CustomSocket->Connected = true;
@@ -179,7 +180,8 @@ int accept_and_stream_custom_socket(struct custom_socket *CustomSocket){
         int iResult = shutdown(CustomSocket->ClientSocket, SD_SEND);
         if (iResult == SOCKET_ERROR) {
             criticalLog("Client Socket Shutdown failed");
-            closesocket(CustomSocket->ClientSocket);            
+            closesocket(CustomSocket->ClientSocket);  
+            CustomSocket->Stopped = true;          
             break;
         }
 

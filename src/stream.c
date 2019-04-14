@@ -267,8 +267,12 @@ run_stream(void *data) {
         }
     }
     // New socket
-    // 5. Detach Thread And Clean custom socket
+    // 5. Detach thread if it's still waiting for connection
+    debugLog("Detaching Thread");
     SDL_DetachThread(custom_socket_thread);
+
+    // New socket
+    // 6. Detach Thread And Clean custom socket
     if(clean_custom_socket(&CustomSocket) < 0){        
         errorLog("Custom socket cleaning failed");
         goto quit;
