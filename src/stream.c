@@ -217,7 +217,8 @@ run_stream(void *data) {
 
     // New socket
     // 0. Init Socket   
-    char* packet_copy = (char*)malloc(sizeof(packet));  
+    //char* packet_copy = (char*)malloc(sizeof(packet));  
+    uint8_t* packet_copy = (uint8_t*)malloc(sizeof(packet.data));  
     struct custom_socket CustomSocket;
     uint16_t Port = DEFAULT_CUSTOM_PORT;
     uint16_t BufferSize = DEFAULT_CUSTOM_BUFLEN;
@@ -240,7 +241,8 @@ run_stream(void *data) {
         // 2. Memory Copy packet data to CustomSocket->Packet
         //debugLog("BufferSize: %d, PacketSize: %d", CustomSocket.BufferSize, sizeof(packet));                 
         if(CustomSocket.Connected){
-            memcpy(packet_copy, &packet, sizeof(packet));
+            //memcpy(packet_copy, &packet, sizeof(packet));
+            memcpy(packet_copy, packet.data, sizeof(packet.data));
             CustomSocket.Packet = packet_copy;
         }   
 

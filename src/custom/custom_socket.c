@@ -129,12 +129,11 @@ int accept_and_stream_custom_socket(struct custom_socket *CustomSocket){
         char *clnt_ip = inet_ntoa(clnt_addr_.sin_addr);
         uint16_t clnt_port = htons (clnt_addr_.sin_port);
         infoLog("Accepted %s remote host on port %d", clnt_ip, clnt_port);
-
         
         uint16_t delay_ = CustomSocket->ThreadSleepingTime; 
         int iSendResult = 0;
-        char *pckt = (char*) NULL;
-        char *pcktsnt = (char*) NULL;
+        uint8_t *pckt = (uint8_t*) NULL;
+        uint8_t *pcktsnt = (uint8_t*) NULL;
         do{
             if(!CustomSocket->Packet){
                 //debugLog("Client Socket Packet is NULL");
@@ -144,19 +143,23 @@ int accept_and_stream_custom_socket(struct custom_socket *CustomSocket){
             else{
                 if(!pckt){
                     //debugLog("Client Socket pckt is NULL: allocating ...");
-                    pckt = (char*) malloc(sizeof(char)*strlen(CustomSocket->Packet));
+                    //pckt = (char*) malloc(sizeof(char)*strlen(CustomSocket->Packet));
+                    pckt = (uint8_t*) malloc(sizeof(CustomSocket->Packet));
                     //debugLog("Client Socket pckt is NULL: allocated");
                 }                    
                 if(!pcktsnt){
                     //debugLog("Client Socket pcktsnt is NULL: allocating ...");
-                    pcktsnt = (char*) malloc(sizeof(char)*strlen(CustomSocket->Packet));
+                    //pcktsnt = (char*) malloc(sizeof(char)*strlen(CustomSocket->Packet));
+                    pcktsnt = (uint8_t*) malloc(sizeof(CustomSocket->Packet));
                     //debugLog("Client Socket pcktsnt is NULL: allocated");
                 }                    
             }
 
-            memcpy(pckt, CustomSocket->Packet, sizeof(char)*strlen(CustomSocket->Packet)); 
+            //memcpy(pckt, CustomSocket->Packet, sizeof(char)*strlen(CustomSocket->Packet)); 
+            memcpy(pckt, CustomSocket->Packet, sizeof(CustomSocket->Packet)); 
 
-            if(memcmp(pckt, pcktsnt, sizeof(char)*strlen(CustomSocket->Packet)) == 0){
+            //if(memcmp(pckt, pcktsnt, sizeof(char)*strlen(CustomSocket->Packet)) == 0){
+            if(memcmp(pckt, pcktsnt, sizeof(CustomSocket->Packet)) == 0){
                 //debugLog("Client Socket Packet already sent");
                 sleep_custom_socket(delay_);
                 continue;
@@ -170,7 +173,8 @@ int accept_and_stream_custom_socket(struct custom_socket *CustomSocket){
             }
             else {
                 //debugLog("Client Socket %d Bytes sent", iSendResult);
-                memcpy(pcktsnt, pckt, sizeof(char)*strlen(CustomSocket->Packet));
+                //memcpy(pcktsnt, pckt, sizeof(char)*strlen(CustomSocket->Packet));
+                memcpy(pcktsnt, pckt, sizeof(CustomSocket->Packet));
             }
 
             sleep_custom_socket(delay_);
