@@ -28,5 +28,6 @@ struct custom_socket{
 int init_custom_socket(struct custom_socket *CustomSocket, uint16_t Port, uint16_t BufferSize, uint16_t ThreadSleepingTime);
 int accept_and_stream_custom_socket(struct custom_socket *CustomSocket);
 int clean_custom_socket(struct custom_socket *CustomSocket);
+int sleep_custom_socket(uint16_t delay_);
 
 #endif

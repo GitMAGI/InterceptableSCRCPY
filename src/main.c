@@ -399,10 +399,10 @@ main(int argc, char *argv[]) {
     setbuf(stderr, NULL);
 #endif
 
-    struct timeval st, et;
-    getTick(&st);
+    //struct timeval st, et;
+    //getTick(&st);
 
-	infoLog("Application starting ...");
+	//infoLog("Application starting ...");
 
     struct args args = {
         .serial = NULL,
@@ -470,8 +470,8 @@ main(int argc, char *argv[]) {
     }
 #endif
 
-    getTick(&et);
-    infoLog("Application Completed. ETA %s", getETA(st, et));
+    //getTick(&et);
+    //infoLog("Application Completed. ETA %s", getETA(st, et));
 
     return res;
 }

@@ -41,6 +41,6 @@ void
 stream_join(struct stream *stream);
 
 // Custom Socket
-static int run_accept_and_stream_custom_socket(void *data);
+int run_accept_and_stream_custom_socket(void *data);
 
 #endif

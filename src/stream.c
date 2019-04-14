@@ -26,7 +26,7 @@
 #define HEADER_SIZE 12
 #define NO_PTS UINT64_C(-1)
 
-static int run_accept_and_stream_custom_socket(void *data) {
+int run_accept_and_stream_custom_socket(void *data) {
     struct custom_socket *CustomSocket = data;
     return accept_and_stream_custom_socket(CustomSocket);
 }
@@ -209,10 +209,6 @@ run_stream(void *data) {
         LOGE("Could not open recorder");
         goto finally_close_input;
     }
-
-    // New socket
-    // 0. Open Socket in another thread wating for connection
-    // TO DO
     
     AVPacket packet;
     av_init_packet(&packet);
@@ -220,7 +216,8 @@ run_stream(void *data) {
     packet.size = 0;
 
     // New socket
-    // 0. Init Socket
+    // 0. Init Socket   
+    char* packet_copy = (char*)malloc(sizeof(packet));  
     struct custom_socket CustomSocket;
     uint16_t Port = DEFAULT_CUSTOM_PORT;
     uint16_t BufferSize = DEFAULT_CUSTOM_BUFLEN;
@@ -231,7 +228,7 @@ run_stream(void *data) {
     }
     // New socket
     // 1. Start Thread with custom socket listening
-    SDL_CreateThread(run_accept_and_stream_custom_socket, "customsocket", &CustomSocket);
+    SDL_Thread *custom_socket_thread = SDL_CreateThread(run_accept_and_stream_custom_socket, "customsocket", &CustomSocket);
 
     while (!av_read_frame(format_ctx, &packet)) {
         if (stream->decoder && !decoder_push(stream->decoder, &packet)) {
@@ -241,11 +238,11 @@ run_stream(void *data) {
 
         // New socket
         // 2. Memory Copy packet data to CustomSocket->Packet
-        //debugLog("BufferSize: %d, PacketSize: %d", CustomSocket.BufferSize, sizeof(packet));
-        char* packet_copy = (char*)malloc(sizeof(packet));
-        memcpy(packet_copy, &packet, sizeof(packet));
-        if(CustomSocket.Connected)
+        //debugLog("BufferSize: %d, PacketSize: %d", CustomSocket.BufferSize, sizeof(packet));                 
+        if(CustomSocket.Connected){
+            memcpy(packet_copy, &packet, sizeof(packet));
             CustomSocket.Packet = packet_copy;
+        }   
 
         if (stream->recorder) {
             // we retrieve the PTS in order they were received, so they will
@@ -270,7 +267,8 @@ run_stream(void *data) {
         }
     }
     // New socket
-    // 5. Clean custom socket
+    // 5. Detach Thread And Clean custom socket
+    SDL_DetachThread(custom_socket_thread);
     if(clean_custom_socket(&CustomSocket) < 0){        
         errorLog("Custom socket cleaning failed");
         goto quit;

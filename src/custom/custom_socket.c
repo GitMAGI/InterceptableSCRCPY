@@ -129,14 +129,35 @@ int accept_and_stream_custom_socket(struct custom_socket *CustomSocket){
         uint16_t clnt_port = htons (clnt_addr_.sin_port);
         infoLog("Accepted %s remote host on port %d", clnt_ip, clnt_port);
 
+        
+        uint16_t delay_ = CustomSocket->ThreadSleepingTime; 
         int iSendResult = 0;
-        char *pckt = (char*) malloc(sizeof(char)*strlen(CustomSocket->Packet));
-        char *pcktsnt = (char*) malloc(sizeof(char)*strlen(CustomSocket->Packet));
+        char *pckt = (char*) NULL;
+        char *pcktsnt = (char*) NULL;
         do{
-            memcpy(pckt, CustomSocket->Packet, sizeof(char)*strlen(CustomSocket->Packet));            
-            
+            if(!CustomSocket->Packet){
+                //debugLog("Client Socket Packet is NULL");
+                sleep_custom_socket(delay_);
+                continue;
+            }
+            else{
+                if(!pckt){
+                    //debugLog("Client Socket pckt is NULL: allocating ...");
+                    pckt = (char*) malloc(sizeof(char)*strlen(CustomSocket->Packet));
+                    //debugLog("Client Socket pckt is NULL: allocated");
+                }                    
+                if(!pcktsnt){
+                    //debugLog("Client Socket pcktsnt is NULL: allocating ...");
+                    pcktsnt = (char*) malloc(sizeof(char)*strlen(CustomSocket->Packet));
+                    //debugLog("Client Socket pcktsnt is NULL: allocated");
+                }                    
+            }
+
+            memcpy(pckt, CustomSocket->Packet, sizeof(char)*strlen(CustomSocket->Packet)); 
+
             if(memcmp(pckt, pcktsnt, sizeof(char)*strlen(CustomSocket->Packet)) == 0){
                 //debugLog("Client Socket Packet already sent");
+                sleep_custom_socket(delay_);
                 continue;
             }
 
@@ -151,12 +172,7 @@ int accept_and_stream_custom_socket(struct custom_socket *CustomSocket){
                 memcpy(pcktsnt, pckt, sizeof(char)*strlen(CustomSocket->Packet));
             }
 
-            uint16_t delay_ = CustomSocket->ThreadSleepingTime;
-            #if defined _WIN64 || defined _WIN32
-                Sleep(delay_);
-            #else
-                sleep(delay_);
-            #endif
+            sleep_custom_socket(delay_);
         } while(CustomSocket->Connected);
 
         // shutdown the connection since we're done
@@ -175,12 +191,24 @@ int accept_and_stream_custom_socket(struct custom_socket *CustomSocket){
     } while(!CustomSocket->Stopped);
 }
 
+int sleep_custom_socket(uint16_t delay_){
+    #if defined _WIN64 || defined _WIN32
+        Sleep(delay_);
+    #else
+        sleep(delay_);
+    #endif
+
+    return 0;
+}
+
 int clean_custom_socket(struct custom_socket *CustomSocket){
     if(CustomSocket){
         CustomSocket->Stopped = true;
         CustomSocket->Connected = false;
+
         // cleanup
-        closesocket(CustomSocket->ListenSocket);
+        if(CustomSocket->ListenSocket)
+            closesocket(CustomSocket->ListenSocket);
     }
     #if defined _WIN64 || defined _WIN32
         WSACleanup();

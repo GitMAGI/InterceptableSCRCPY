@@ -97,29 +97,36 @@ void criticalLog_(const char* caller, char* format, ...){
 
 void writeLog(char* msg, const char* scope, LogType type){
 	char* str = "DEBUG";
+    FILE* std = stdout;
 	switch(type)
     {
 		case LDEBUG: 
-			str = "DEBUG";        
+			str = "DEBUG"; 
+            std = stdout;       
 			break;
 		case LINFO: 
 			str = "INFO";
+            std = stdout;
 			break;
 		case LWARNING: 
 			str = "WARNING";
+            std = stdout;
 			break;
 		case LERROR: 
 			str = "ERROR";
+            std = stderr;
 			break;
 		case LCRITICAL: 
 			str = "CRITICAL";
+            std = stderr;
 			break;
         default:
             str = "DEBUG";
+            std = stdout;
     }
 
     char* toLog = toLog = ssprintf("%s | %s | %s | %s() >>> %s\n", getCurrentTimeStamp(), str, APPNAME, scope, msg);
-    fprintf(stdout, toLog);
+    fprintf(std, toLog);
 
     #if defined LOGFILEPATH
         char* fileextension = "log";
